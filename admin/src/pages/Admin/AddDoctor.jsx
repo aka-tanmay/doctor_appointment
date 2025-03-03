@@ -3,6 +3,7 @@ import { assets } from '../../assets/assets'
 import { useState } from 'react'
 import { AdminContext } from '../../context/AdminContext'
 import {toast} from 'react-toastify'
+import axios from 'axios'
 
 const AddDoctor = () => {
 
@@ -41,11 +42,23 @@ const AddDoctor = () => {
         formData.append('about',about)
         formData.append('speciality',speciality)
         formData.append('degree',degree)
-        formData.append('address',{line1:address1,line2:address2})
+        formData.append('address',JSON.stringify({line1:address1,line2:address2}))
 
 
+       //console.log formdata
 
+       formData.forEach((value,key)=>{
+         console.log(`${key} : ${value}`)
+       })
 
+       const {data} = await axios.post(backendUrl + '/api/admin/add-doctor',formData,{headers: { aToken } })
+
+       if (data.success) {
+          toast.success(data.message)
+        
+       }else{
+        toast.error(data.message)
+       }
 
 
 
@@ -133,7 +146,7 @@ const AddDoctor = () => {
 
             <div className='flex-1 flex flex-col gap-1'>
               <p>Education</p>
-              <input onChange={(e)=> setDegree(e.target.value)} value={degree}className='border rounded px-3 py-2' type="text" placeholder='fees' required />
+              <input onChange={(e)=> setDegree(e.target.value)} value={degree}className='border rounded px-3 py-2' type="text" placeholder='' required />
             </div>
 
             <div className='flex-1 flex flex-col gap-1'>

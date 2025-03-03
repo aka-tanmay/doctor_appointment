@@ -1,5 +1,5 @@
 import validator from 'validator'
-import bycrypt from 'bcrypt' 
+import bcrypt from 'bcrypt' 
 import {v2 as cloudinary } from "cloudinary"
 import doctorModel from '../models/doctorModel.js'
 import jwt from 'jsonwebtoken'
@@ -7,6 +7,7 @@ import dotenv from 'dotenv'
 dotenv.config()
 // API for adding doctor 
 const addDoctor = async (req,res) => {
+    
 
     try{
 
@@ -33,7 +34,7 @@ const addDoctor = async (req,res) => {
        }
 
       //hashing doctor password
-      const salt = await bycrypt.genSalt(10)
+      const salt = await bcrypt.genSalt(10)
       const hashedPassword = await bcrypt.hash(password, salt)
 
       //upload image to cloudinary
