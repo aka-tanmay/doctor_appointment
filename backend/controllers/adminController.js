@@ -97,4 +97,8 @@ const loginAdmin = async (req,res) => {
     }
 }
 
+
+// API to get get all doctors list
+
+ const allDoctors = async (req,res) => { }
 export {addDoctor,loginAdmin}
