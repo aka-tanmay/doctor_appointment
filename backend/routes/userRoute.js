@@ -24,3 +24,11 @@ userRouter.get('/appointments',authUser,listAppointment)
 
 
 export default userRouter
+
+
+
+
+
+
+
+
