@@ -6,7 +6,7 @@ import { toast } from 'react-toastify'
 
 function MyAppointments() {
 
-  const { backendUrl,token } = useContext(AppContext)
+  const { backendUrl,token ,getDoctorsData} = useContext(AppContext)
 
   const [appointments,setAppointments] = useState([])
   const months = [ " ","Jan" ,"Feb" ,"March" ,"Apr","May","June","Jul","Aug", "Sep" , "Oct","Nov","Dec" ]
@@ -21,6 +21,8 @@ function MyAppointments() {
     try {
       
       const{data} = await axios.get(backendUrl + '/api/user/appointments',{headers:{token}})
+     
+      
       if (data.success) {
         setAppointments(data.appointments.reverse())
         console.log( data.appointments);
@@ -42,6 +44,7 @@ function MyAppointments() {
        if (data.success) {
         toast.success(data.message)
         getUserAppointments()
+        getDoctorsData()
        }else{
         toast.error(data.message)
        }
@@ -52,6 +55,44 @@ function MyAppointments() {
         
       }
     }
+
+    const initPay = (order) =>{
+
+      const options ={
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+        amount:order.amount,
+        currency:order.currency,
+        name:'Appointment Payment',
+        description:'Appointment Payment',
+        order_id:order.id,
+        receipt:order.receipt,
+        handler:async(response) => {
+          console.log(response)
+          
+        }
+
+      }
+
+
+      const rzp = new window.Razorpay(options)
+      rzp.open()
+    }
+
+   const appointmentRazorpay = async (appointmentId) =>{
+
+     try {
+      
+      const {data} = await axios.post(backendUrl+'/api/user/payment-razorpay',{appointmentId},{headers:{token}})
+      
+      
+      if (data.sucess) {
+        initPay(data.order)
+      }
+     } catch (error) {
+      
+     }
+
+   }
 
   useEffect(()=>{
 
@@ -87,8 +128,9 @@ function MyAppointments() {
  
             <div> </div>         
             <div className='flex flex-col gap-2 justify end'>
-              {!item.cancelled}<button className='text-sm text-stone-500 text-center sm:min-w-48 py-2 border rounded hover:bg-primary hover:text-white transition-all duration-300'>Pay Online</button>
-              {!item.cancelled && <button onClick={()=>cancelAppointment(item._id)}className='text-sm text-stone-500 text-center sm:min-w-48 py-2 border rounded hover:bg-red-600 hover:text-white transition-all duration-300'>Cancel appointment</button> }
+              { !item.cancelled  && <button onClick={()=>appointmentRazorpay(item._id)}className='text-sm text-stone-500 text-center sm:min-w-48 py-2 border rounded hover:bg-primary hover:text-white transition-all duration-300'>Pay Online</button>}
+              { !item.cancelled && <button onClick={()=>cancelAppointment(item._id)}className='text-sm text-stone-500 text-center sm:min-w-48 py-2 border rounded hover:bg-red-600 hover:text-white transition-all duration-300'>Cancel appointment</button> }
+              { item.cancelled && <button className='sm:min-w-48 py-2 border border-red-500 rounded text-red-500'>Appointment Cancelled</button>}
             </div> 
             </div>
           ))}
