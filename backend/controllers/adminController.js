@@ -4,6 +4,7 @@ import {v2 as cloudinary } from "cloudinary"
 import doctorModel from '../models/doctorModel.js'
 import jwt from 'jsonwebtoken'
 import dotenv from 'dotenv'
+import appointmentModel from '../models/appointmentModel.js'
 dotenv.config()
 // API for adding doctor 
 const addDoctor = async (req,res) => {
@@ -115,4 +116,5 @@ const loginAdmin = async (req,res) => {
     }
   }
 
-export {addDoctor,loginAdmin,allDoctors}
+
+export {addDoctor,loginAdmin,allDoctors,appointmentsAdmin}  //exporting all the functions to use in routes
