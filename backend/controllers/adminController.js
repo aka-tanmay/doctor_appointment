@@ -7,71 +7,75 @@ import dotenv from 'dotenv'
 import appointmentModel from '../models/appointmentModel.js'
 import userModel from '../models/userModel.js'
 dotenv.config()
+
 // API for adding doctor 
-const addDoctor = async (req,res) => {
-    
+const addDoctor = async (req, res) => {
+  try {
+    const { name, email, password, speciality, degree, experience, about, fees, address } = req.body;
+    const imageFile = req.file;
 
-    try{
-
-        const { name ,email, password,  speciality, degree, experience, about,  fees, address,} = req.body
-        const  imageFile = req.file
-    
- 
-       //checking for all data to add doctor
-       if (!name || !email || !password || !speciality || !degree || !experience || !about || !fees || !address  ){
-        return res.json({success:false,message:"Missing Details"})
-
-       }
-
-       //validating email format
-       if (!validator.isEmail(email)) {
-        return res.json({success:false,message:"Please enter a valid email"})
-
-        }
-
-    // validating strong password
-    if (password.length < 8 ) {
-        return res.json({success:false,message:"Please enter strong password"})
-        
-       }
-
-      //hashing doctor password
-      const salt = await bcrypt.genSalt(10)
-      const hashedPassword = await bcrypt.hash(password, salt)
-
-      //upload image to cloudinary
-      const imageupload = await cloudinary.uploader.upload(imageFile.path,{ressource_type:"image"})
-      const imageUrl = imageupload.secure_url
-
-      const doctorData = {
-
-        name,
-        email,
-        image:imageUrl,
-        password:hashedPassword,
-        speciality,
-        degree,
-        experience,
-        about,
-        fees,
-        address:JSON.parse(address),
-        date:Date.now()
-         
-      }
-
-
-      const newDoctor = new doctorModel(doctorData)
-      await newDoctor.save()
-
-      res.json({success:true,message:"Doctor added"})
-         
-
-    }catch(error){
- 
-         console.log(error)
-         res.json({success:false,message:error.message})
+    // Check if all required fields are present
+    if (!name || !email || !password || !speciality || !degree || !experience || !about || !fees || !address || !imageFile) {
+      return res.json({ success: false, message: "Missing required fields" });
     }
-}
+
+    // Validate individual string fields
+    if (!name.trim()) {
+      return res.json({ success: false, message: "Doctor name cannot be empty" });
+    }
+
+    if (!degree.trim()) {
+      return res.json({ success: false, message: "Doctor degree cannot be empty" });
+    }
+
+    if (!about.trim()) {
+      return res.json({ success: false, message: "About doctor section cannot be empty" });
+    }
+
+    // Validate email format
+    if (!validator.isEmail(email)) {
+      return res.json({ success: false, message: "Please enter a valid email" });
+    }
+
+    // Validate password strength
+    if (password.length < 8) {
+      return res.json({ success: false, message: "Please enter a strong password (min 8 characters)" });
+    }
+
+    // Hash password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // Upload image to Cloudinary
+    const imageupload = await cloudinary.uploader.upload(imageFile.path, { resource_type: "image" });
+    const imageUrl = imageupload.secure_url;
+
+    // Create doctor data
+    const doctorData = {
+      name: name.trim(),
+      email,
+      image: imageUrl,
+      password: hashedPassword,
+      speciality,
+      degree: degree.trim(),
+      experience,
+      about: about.trim(),
+      fees,
+      address: JSON.parse(address),
+      date: Date.now()
+    };
+
+    const newDoctor = new doctorModel(doctorData);
+    await newDoctor.save();
+
+    res.json({ success: true, message: "Doctor added" });
+
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: error.message });
+  }
+};
+
 
 //API for admin Login
 
